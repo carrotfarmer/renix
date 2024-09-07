@@ -37,6 +37,9 @@ struct Cli {
 
     #[clap(short = 'c', long = "case", help = "Change case of file names")]
     case: Option<String>,
+
+    #[clap(long = "replace", help = "Replace a substring in the file names")]
+    replace: Option<String>,
 }
 
 fn main() {
@@ -67,6 +70,17 @@ fn main() {
     if args.case.is_some() {
         let case = args.case.unwrap();
         new_file_paths = file::change_case(&new_file_paths, &case);
+    }
+
+    if args.replace.is_some() {
+        let replace = args.replace.unwrap();
+        let parts: Vec<&str> = replace.split(',').collect();
+        if parts.len() != 2 {
+            utils::perror("invalid replace argument");
+            std::process::exit(1);
+        }
+
+        new_file_paths = file::replace_substring(&new_file_paths, parts[0], parts[1]);
     }
 
     if !args.no_table {

@@ -137,6 +137,24 @@ pub fn change_case(files: &Vec<path::PathBuf>, case: &str) -> Vec<std::path::Pat
     new_file_paths
 }
 
+pub fn replace_substring(
+    files: &Vec<path::PathBuf>,
+    old: &str,
+    new: &str,
+) -> Vec<std::path::PathBuf> {
+    let mut new_file_paths: Vec<std::path::PathBuf> = Vec::new();
+
+    for file in files {
+        let new_name = file.file_name().unwrap().to_str().unwrap().to_string();
+        let new_name = new_name.replace(old, new);
+
+        let new_path = file.with_file_name(new_name);
+        new_file_paths.push(new_path);
+    }
+
+    new_file_paths
+}
+
 pub fn rename_files(old_paths: Vec<std::path::PathBuf>, new_paths: Vec<std::path::PathBuf>) {
     for (old_path, new_path) in old_paths.iter().zip(new_paths.iter()) {
         std::fs::rename(old_path, new_path).unwrap();
