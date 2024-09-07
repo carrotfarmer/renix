@@ -3,7 +3,7 @@ mod utils;
 
 use std::path;
 
-use clap::{Parser, Subcommand};
+use clap::Parser;
 use colored::*;
 
 #[derive(Parser)]
@@ -34,6 +34,9 @@ struct Cli {
 
     #[clap(short = 'r', long = "remove", help = "Remove a prefix and/or suffix")]
     remove: bool,
+
+    #[clap(short = 'c', long = "case", help = "Change case of file names")]
+    case: Option<String>,
 }
 
 fn main() {
@@ -55,18 +58,37 @@ fn main() {
         std::process::exit(1);
     }
 
+    let mut new_file_paths = if args.remove {
+        file::remove_suffix_prefix(&file::get_files(&args.path), &args.prefix, &args.suffix)
+    } else {
+        file::add_suffix_prefix(&file::get_files(&args.path), &args.prefix, &args.suffix)
+    };
+
+    if args.case.is_some() {
+        let case = args.case.unwrap();
+        new_file_paths = file::change_case(&new_file_paths, &case);
+    }
+
     if !args.no_table {
-        let table = file::print_files(file::get_files(&args.path));
+        let table = file::print_table(&file::get_files(&args.path), new_file_paths.clone());
         println!("{}", table);
     }
 
-    if args.remove {
-        file::remove_suffix_prefix(&file::get_files(&args.path), &args.prefix, &args.suffix);
-    } else {
-        file::add_suffix_prefix(&file::get_files(&args.path), &args.prefix, &args.suffix);
+    println!("{}", "Do you want to rename the files? (y/n)".yellow());
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input).unwrap();
+
+    if !input.trim().eq_ignore_ascii_case("y") || input.trim().is_empty() {
+        println!("{}", "Exiting...".yellow());
+        std::process::exit(0);
+    }
+
+    for (old, new) in file::get_files(&args.path)
+        .iter()
+        .zip(new_file_paths.iter())
+    {
+        std::fs::rename(old, new).unwrap();
     }
 
     println!("{}", "Files renamed successfully!".green());
-
-    println!("hello, world!");
 }
