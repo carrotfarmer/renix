@@ -2,6 +2,8 @@
 
 renix is a blazingly-fast CLI utility for batch renaming files.
 
+`crates.io`: [renix](https://crates.io/crates/renix)
+
 ## Installation
 
 ```bash
