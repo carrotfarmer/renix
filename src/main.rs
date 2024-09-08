@@ -11,8 +11,6 @@ use colored::*;
 #[command(version = "1.0")]
 #[command(about = "fast batch renaming utility", long_about = None)]
 struct Cli {
-    name: Option<String>,
-
     // path to dir containing files to be renamed
     #[clap(
         short = 'd',
