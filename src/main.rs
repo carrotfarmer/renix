@@ -40,6 +40,9 @@ struct Cli {
 
     #[clap(long = "replace", help = "Replace a substring in the file names")]
     replace: Option<String>,
+
+    #[clap(short = 'e', long = "exclude", help = "Exclude certain files")]
+    exclude: Option<Vec<path::PathBuf>>,
 }
 
 fn main() {
@@ -61,15 +64,39 @@ fn main() {
         std::process::exit(1);
     }
 
+    if args.exclude.is_some() {
+        let exclude = args.exclude.clone().unwrap();
+        for path in exclude {
+            if !path.exists() {
+                utils::perror("exclude path does not exist");
+                std::process::exit(1);
+            }
+        }
+    }
+
     let mut new_file_paths = if args.remove {
-        file::remove_suffix_prefix(&file::get_files(&args.path), &args.prefix, &args.suffix)
+        let exclude = &args.exclude;
+
+        file::remove_suffix_prefix(
+            &file::get_files(&args.path),
+            &args.prefix,
+            &args.suffix,
+            &exclude,
+        )
     } else {
-        file::add_suffix_prefix(&file::get_files(&args.path), &args.prefix, &args.suffix)
+        let exclude = &args.exclude;
+
+        file::add_suffix_prefix(
+            &file::get_files(&args.path),
+            &args.prefix,
+            &args.suffix,
+            &exclude,
+        )
     };
 
     if args.case.is_some() {
         let case = args.case.unwrap();
-        new_file_paths = file::change_case(&new_file_paths, &case);
+        new_file_paths = file::change_case(&new_file_paths, &case, &args.exclude);
     }
 
     if args.replace.is_some() {
@@ -80,7 +107,8 @@ fn main() {
             std::process::exit(1);
         }
 
-        new_file_paths = file::replace_substring(&new_file_paths, parts[0], parts[1]);
+        new_file_paths =
+            file::replace_substring(&new_file_paths, parts[0], parts[1], &args.exclude);
     }
 
     if !args.no_table {

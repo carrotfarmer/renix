@@ -48,10 +48,19 @@ pub fn add_suffix_prefix(
     files: &Vec<path::PathBuf>,
     prefix: &Option<String>,
     suffix: &Option<String>,
+    exclude: &Option<Vec<path::PathBuf>>,
 ) -> Vec<std::path::PathBuf> {
     let mut new_file_paths: Vec<std::path::PathBuf> = Vec::new();
 
     for file in files {
+        if exclude.is_some() {
+            let exclude = exclude.as_ref().unwrap();
+            if exclude.contains(file) {
+                new_file_paths.push(file.clone());
+                continue;
+            }
+        }
+
         let new_name = file.file_name().unwrap().to_str().unwrap().to_string();
         let new_name = match &prefix {
             Some(prefix) => format!("{}{}", prefix, new_name),
@@ -78,10 +87,19 @@ pub fn remove_suffix_prefix(
     files: &Vec<path::PathBuf>,
     prefix: &Option<String>,
     suffix: &Option<String>,
+    exclude: &Option<Vec<path::PathBuf>>,
 ) -> Vec<std::path::PathBuf> {
     let mut new_file_paths: Vec<std::path::PathBuf> = Vec::new();
 
     for file in files {
+        if exclude.is_some() {
+            let exclude = exclude.as_ref().unwrap();
+            if exclude.contains(file) {
+                new_file_paths.push(file.clone());
+                continue;
+            }
+        }
+
         let new_name = file.file_name().unwrap().to_str().unwrap().to_string();
         let new_name = match &prefix {
             Some(prefix) => new_name.strip_prefix(prefix).unwrap().to_string(),
@@ -111,10 +129,22 @@ pub fn remove_suffix_prefix(
     new_file_paths
 }
 
-pub fn change_case(files: &Vec<path::PathBuf>, case: &str) -> Vec<std::path::PathBuf> {
+pub fn change_case(
+    files: &Vec<path::PathBuf>,
+    case: &str,
+    exclude: &Option<Vec<path::PathBuf>>,
+) -> Vec<std::path::PathBuf> {
     let mut new_file_paths: Vec<std::path::PathBuf> = Vec::new();
 
     for file in files {
+        if exclude.is_some() {
+            let exclude = exclude.as_ref().unwrap();
+            if exclude.contains(file) {
+                new_file_paths.push(file.clone());
+                continue;
+            }
+        }
+
         let new_name = file.file_name().unwrap().to_str().unwrap().to_string();
         let new_name = match case {
             "upper" => {
@@ -141,10 +171,19 @@ pub fn replace_substring(
     files: &Vec<path::PathBuf>,
     old: &str,
     new: &str,
+    exclude: &Option<Vec<path::PathBuf>>,
 ) -> Vec<std::path::PathBuf> {
     let mut new_file_paths: Vec<std::path::PathBuf> = Vec::new();
 
     for file in files {
+        if exclude.is_some() {
+            let exclude = exclude.as_ref().unwrap();
+            if exclude.contains(file) {
+                new_file_paths.push(file.clone());
+                continue;
+            }
+        }
+
         let new_name = file.file_name().unwrap().to_str().unwrap().to_string();
         let new_name = new_name.replace(old, new);
 
