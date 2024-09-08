@@ -1,5 +1,8 @@
 [package]
 name = "renix"
+description = "renix is a blazingly-fast CLI utility for batch renaming files."
+license = "MIT"
+
 version = "0.1.0"
 edition = "2021"
 
